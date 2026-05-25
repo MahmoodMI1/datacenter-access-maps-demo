@@ -176,10 +176,10 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (searchEngine.focusedMatch) {
+    if (searchEngine.navGeneration > 0 && searchEngine.focusedMatch) {
       jumpToNode(searchEngine.focusedMatch);
     }
-  }, [searchEngine.focusedMatch, searchEngine.currentIndex]);
+  }, [searchEngine.navGeneration]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -227,14 +227,11 @@ export default function App() {
   if (authLoading) return <div style={styles.authShell}><span style={styles.authLoadingText}>LOADING...</span></div>;
   if (!session) return <Login onSignIn={signIn} />;
 
-  const filteredNodes = searchEngine.query.trim()
-    ? searchEngine.matches
-    : nodeLayer.nodes;
-
-  // Panel always shows unique names — duplicates collapsed with a count badge.
-  // ◀▶ navigation still cycles through all instances via searchEngine.focusedMatch.
   const panelNodes = (() => {
-    const source = searchEngine.query.trim() ? searchEngine.matches : nodeLayer.nodes;
+    const q = searchEngine.query.trim().toLowerCase();
+    const source = q
+      ? nodeLayer.nodes.filter((n) => n.name.toLowerCase().includes(q))
+      : nodeLayer.nodes;
     const seen = new Map();
     for (const n of source) {
       if (!seen.has(n.name)) seen.set(n.name, { ...n, count: 1 });
@@ -509,8 +506,7 @@ export default function App() {
                 onClick={(e) => {
                   e.stopPropagation();
                   nodeLayer.selectNode(node.id);
-                  const matchIdx = searchEngine.matches.findIndex((m) => m.id === node.id);
-                  if (matchIdx !== -1) searchEngine.goToIndex(matchIdx);
+                  searchEngine.focusNode(node.name, node.id);
                 }}
                 style={{
                   position: "absolute",
@@ -712,7 +708,7 @@ export default function App() {
                 placeholder="Search nodes..."
                 style={styles.searchInput}
               />
-              {searchEngine.query && (
+              {(searchEngine.query || searchEngine.focusedName) && (
                 <button
                   onClick={() => searchEngine.clearSearch()}
                   style={styles.searchClear}
@@ -723,7 +719,7 @@ export default function App() {
             </div>
 
             {/* Search navigation — ◀ ▶ with counter */}
-            {searchEngine.query.trim() && (
+            {searchEngine.focusedName && (
               <div style={styles.searchNav}>
                 <button
                   onClick={searchEngine.goPrev}
@@ -845,14 +841,10 @@ export default function App() {
                     ) : (
                       <span
                         onClick={() => {
-                          if (isDuplicated) {
-                            searchEngine.setQuery(node.name);
-                          } else {
-                            jumpToNode(node);
-                          }
+                          searchEngine.focusNode(node.name, node.id);
                         }}
                         style={styles.nodeName}
-                        title={isDuplicated ? `${node.count} locations — click to cycle` : "Click to zoom to node"}
+                        title={isDuplicated ? `${node.count} locations — use ◀▶ to cycle` : "Click to zoom to node"}
                       >
                         {node.name}
                       </span>
