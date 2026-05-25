@@ -14,10 +14,9 @@ export async function fetchMaps() {
 }
 
 export async function createMap(name, fileType, width, height) {
-  const { data: { user } } = await supabase.auth.getUser();
   const { data, error } = await supabase
     .from("maps")
-    .insert({ name, file_type: fileType, width, height, user_id: user.id })
+    .insert({ name, file_type: fileType, width, height })
     .select()
     .single();
   if (error) throw error;
