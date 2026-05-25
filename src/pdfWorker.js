@@ -6,4 +6,4 @@ if (!Promise.withResolvers) {
   };
 }
 
-import "pdfjs-dist/build/pdf.worker.mjs";
+await import("pdfjs-dist/build/pdf.worker.mjs");
