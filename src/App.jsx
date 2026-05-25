@@ -508,8 +508,9 @@ export default function App() {
                 key={node.id}
                 onClick={(e) => {
                   e.stopPropagation();
-                  searchEngine.setQuery(node.name);
                   nodeLayer.selectNode(node.id);
+                  const matchIdx = searchEngine.matches.findIndex((m) => m.id === node.id);
+                  if (matchIdx !== -1) searchEngine.goToIndex(matchIdx);
                 }}
                 style={{
                   position: "absolute",
@@ -885,19 +886,28 @@ export default function App() {
                               ✎
                             </button>
                           )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              nodeLayer.deleteNode(node.id);
-                            }}
-                            style={{
-                              ...styles.actionBtn,
-                              color: "#e05555",
-                            }}
-                            title="Delete"
-                          >
-                            ✕
-                          </button>
+                          {(() => {
+                            const deleteId = isDuplicated
+                              ? (searchEngine.focusedMatch?.name === node.name ? searchEngine.focusedMatch.id : null)
+                              : node.id;
+                            return (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (deleteId) nodeLayer.deleteNode(deleteId);
+                                }}
+                                disabled={!deleteId}
+                                style={{
+                                  ...styles.actionBtn,
+                                  color: deleteId ? "#e05555" : "#3a5568",
+                                  cursor: deleteId ? "pointer" : "not-allowed",
+                                }}
+                                title={isDuplicated && !deleteId ? "Use ◀▶ to navigate to a specific instance first" : "Delete"}
+                              >
+                                ✕
+                              </button>
+                            );
+                          })()}
                         </>
                       )}
                     </div>
