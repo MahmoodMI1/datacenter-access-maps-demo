@@ -32,6 +32,7 @@ export default function App() {
   const [nodeSize, setNodeSize] = useState(10);
   const nameInputRef = useRef(null);
   const searchInputRef = useRef(null);
+  const panelRef = useRef(null);
 
   const handleCardClick = useCallback(async (mapRecord) => {
     try {
@@ -211,6 +212,7 @@ export default function App() {
 
   useEffect(() => {
     const handler = (e) => {
+      if (panelRef.current?.contains(e.target)) return;
       e.preventDefault();
       viewport.handleWheel(e, containerRef.current);
     };
@@ -682,9 +684,17 @@ export default function App() {
         )}
       </div>
 
+        {/* Panel toggle tab */}
+        <button
+          onClick={() => setPanelOpen((p) => !p)}
+          style={styles.panelToggle}
+        >
+          {panelOpen ? "▶" : "◀"}
+        </button>
+
         {/* ---- SIDE PANEL ---- */}
         {panelOpen && (
-          <div style={styles.panel}>
+          <div ref={panelRef} style={styles.panel}>
             {/* Panel header */}
             <div style={styles.panelHeader}>
               <span style={styles.panelTitle}>NODES</span>
@@ -910,13 +920,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Panel toggle tab */}
-        <button
-          onClick={() => setPanelOpen((p) => !p)}
-          style={styles.panelToggle}
-        >
-          {panelOpen ? "▶" : "◀"}
-        </button>
       </div>
 
       {/* ---- STATUS BAR ---- */}

@@ -2,10 +2,10 @@ import { colors, font, radius } from "./tokens";
 
 export const panelStyles = {
   panel: {
-    width: 260,
-    minWidth: 260,
+    width: 300,
+    minWidth: 300,
     background: colors.surface,
-    borderLeft: `1px solid ${colors.border}`,
+    borderRight: `1px solid ${colors.border}`,
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
@@ -122,6 +122,7 @@ export const panelStyles = {
   },
   nodeList: {
     flex: 1,
+    minHeight: 0,
     overflowY: "auto",
     padding: "4px 8px",
   },
@@ -183,7 +184,7 @@ export const panelStyles = {
     width: 20,
     background: colors.surface,
     border: "none",
-    borderLeft: `1px solid ${colors.border}`,
+    borderRight: `1px solid ${colors.border}`,
     color: colors.textMuted,
     fontSize: 10,
     cursor: "pointer",
