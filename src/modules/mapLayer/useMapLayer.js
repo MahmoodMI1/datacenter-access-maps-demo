@@ -1,9 +1,8 @@
 import { useState, useCallback, useRef } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Use the bundled worker from pdfjs-dist
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.mjs",
+  "../../pdfWorker.js",
   import.meta.url
 ).toString();
 
