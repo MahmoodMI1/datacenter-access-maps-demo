@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables (Supabase keys — never commit)
+.env
+.env.local
+.env.*.local
+
+# Local Netlify folder
+.netlify
