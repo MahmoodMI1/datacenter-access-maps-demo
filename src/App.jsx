@@ -251,7 +251,7 @@ export default function App() {
     return (
       <div style={styles.dashShell}>
         <div style={styles.dashHeader}>
-          <span style={styles.dashTitle}>FLOOR PLANS</span>
+          <span style={styles.dashTitle}>Site Access Plans</span>
           <div style={styles.dashHeaderRight}>
             <button onClick={() => dashboardNewMapInputRef.current?.click()} style={styles.dashCreateBtn}>
               + NEW MAP
@@ -326,7 +326,7 @@ export default function App() {
                 : "0 0 6px #ff6b3566",
             }}
           />
-          <span style={styles.title}>FLOOR PLAN</span>
+          <span style={styles.title}>Site Access Plan</span>
           {map.mapType && (
             <span style={styles.fileTypeBadge}>
               {map.mapType.toUpperCase()}
@@ -537,7 +537,7 @@ export default function App() {
                       ? "#0096D6"
                       : isSelected
                       ? "#0096D6"
-                      : "#002A3A",
+                      : "#FFFFFF",
                     border: `2px solid ${
                       isFocused
                         ? "#007AB8"
@@ -545,14 +545,14 @@ export default function App() {
                         ? "#007AB8"
                         : isSelected
                         ? "#007AB8"
-                        : "#DDE1E6"
+                        : "#002A3A"
                     }`,
                     boxShadow: isFocused
-                      ? "0 0 12px rgba(0,150,214,0.5)"
+                      ? "0 0 0 3px #FFFFFF, 0 0 0 5px #0096D6, 0 0 12px rgba(0,150,214,0.4)"
                       : isMatch
-                      ? "0 0 8px rgba(0,150,214,0.35)"
+                      ? "0 0 0 3px #FFFFFF, 0 0 0 5px #0096D6, 0 0 8px rgba(0,150,214,0.3)"
                       : isSelected
-                      ? "0 0 8px rgba(0,150,214,0.4)"
+                      ? "0 0 0 3px #FFFFFF, 0 0 0 5px #0096D6, 0 0 8px rgba(0,150,214,0.3)"
                       : "0 1px 3px rgba(0,0,0,0.15)",
                     transition: "all 0.15s ease",
                   }}

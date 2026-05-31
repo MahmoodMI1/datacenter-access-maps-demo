@@ -24,33 +24,40 @@ export default function Login({ onSignIn }) {
   return (
     <div style={styles.shell}>
       <div style={styles.card}>
-        <div style={styles.header}>
-          <div style={styles.dot} />
-          <span style={styles.title}>FLOOR PLAN</span>
+        {/* Navy header strip */}
+        <div style={styles.navyStrip}>
+          <div style={styles.logo}>DR</div>
+          <div>
+            <div style={styles.title}>Site Access Plan</div>
+            <div style={styles.subtitle}>Digital Realty · Facility Access</div>
+          </div>
         </div>
-        <p style={styles.subtitle}>Sign in to continue</p>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={styles.input}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={styles.input}
-          />
-          {error && <p style={styles.error}>{error}</p>}
-          <button type="submit" disabled={loading} style={styles.btn}>
-            {loading ? "SIGNING IN..." : "SIGN IN"}
-          </button>
-        </form>
+
+        {/* Form body */}
+        <div style={styles.body}>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={styles.input}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={styles.input}
+            />
+            {error && <p style={styles.error}>{error}</p>}
+            <button type="submit" disabled={loading} style={styles.btn}>
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -70,32 +77,45 @@ const styles = {
     background: "#FFFFFF",
     border: "1px solid #DDE1E6",
     borderRadius: 8,
-    padding: "36px 40px",
     width: 380,
-    boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
+    overflow: "hidden",
   },
-  header: {
+  navyStrip: {
+    background: "#002A3A",
+    padding: "24px 28px",
     display: "flex",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 6,
+    gap: 14,
   },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: "50%",
-    background: "#0096D6",
+  logo: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+    background: "linear-gradient(135deg, #0096D6 0%, #00B4D8 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 13,
+    fontWeight: 700,
+    color: "#fff",
+    flexShrink: 0,
   },
   title: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 600,
-    color: "#002A3A",
+    color: "#FFFFFF",
+    lineHeight: 1.2,
   },
   subtitle: {
-    fontSize: 13,
-    color: "#5A6872",
-    marginBottom: 24,
+    fontSize: 11,
+    color: "#6BA3BE",
     marginTop: 2,
+    fontWeight: 500,
+    letterSpacing: "0.02em",
+  },
+  body: {
+    padding: "28px 28px 32px",
   },
   form: {
     display: "flex",
