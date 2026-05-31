@@ -17,4 +17,4 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
     X-Robots-Tag = "noindex, nofollow"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://gktkxbnyrfdvqgxcrbbf.supabase.co; connect-src 'self' https://gktkxbnyrfdvqgxcrbbf.supabase.co wss://gktkxbnyrfdvqgxcrbbf.supabase.co; worker-src 'self' blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://gktkxbnyrfdvqgxcrbbf.supabase.co; connect-src 'self' https://gktkxbnyrfdvqgxcrbbf.supabase.co wss://gktkxbnyrfdvqgxcrbbf.supabase.co; worker-src 'self' blob:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'"

@@ -168,9 +168,10 @@ export default function App() {
     (node) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.width / 2 - node.x * INSPECTION_ZOOM;
-      const centerY = rect.height / 2 - node.y * INSPECTION_ZOOM;
-      viewport.zoomTo(INSPECTION_ZOOM, centerX, centerY);
+      const targetZoom = Math.max(viewport.zoom, INSPECTION_ZOOM);
+      const centerX = rect.width / 2 - node.x * targetZoom;
+      const centerY = rect.height / 2 - node.y * targetZoom;
+      viewport.zoomTo(targetZoom, centerX, centerY);
       nodeLayer.selectNode(node.id);
     },
     [viewport, nodeLayer]
@@ -521,6 +522,7 @@ export default function App() {
                   gap: 2,
                   pointerEvents: "auto",
                   cursor: "pointer",
+                  zIndex: isSelected || isFocused ? 10 : 1,
                 }}
               >
                 {/* Dot */}
@@ -530,28 +532,28 @@ export default function App() {
                     height: nodeSize,
                     borderRadius: "50%",
                     background: isFocused
-                      ? "#ff5c35"
+                      ? "#0096D6"
                       : isMatch
-                      ? "#ffc233"
+                      ? "#0096D6"
                       : isSelected
-                      ? "#ff5c35"
-                      : "#4a90a4",
+                      ? "#0096D6"
+                      : "#002A3A",
                     border: `2px solid ${
                       isFocused
-                        ? "#ff8a65"
+                        ? "#007AB8"
                         : isMatch
-                        ? "#ffe082"
+                        ? "#007AB8"
                         : isSelected
-                        ? "#ff8a65"
-                        : "#2a3a42"
+                        ? "#007AB8"
+                        : "#DDE1E6"
                     }`,
                     boxShadow: isFocused
-                      ? "0 0 12px #ff5c35aa"
+                      ? "0 0 12px rgba(0,150,214,0.5)"
                       : isMatch
-                      ? "0 0 8px #ffc23388"
+                      ? "0 0 8px rgba(0,150,214,0.35)"
                       : isSelected
-                      ? "0 0 8px #ff5c3588"
-                      : "0 0 4px rgba(0,0,0,0.4)",
+                      ? "0 0 8px rgba(0,150,214,0.4)"
+                      : "0 1px 3px rgba(0,0,0,0.15)",
                     transition: "all 0.15s ease",
                   }}
                 />
@@ -559,16 +561,15 @@ export default function App() {
                 <span
                   style={{
                     fontSize: Math.round(nodeSize * 0.8),
-                    fontFamily:
-                      "'IBM Plex Mono', 'JetBrains Mono', monospace",
+                    fontFamily: "'DM Sans', system-ui, sans-serif",
                     color: isFocused
-                      ? "#ff8a65"
+                      ? "#007AB8"
                       : isMatch
-                      ? "#ffc233"
+                      ? "#007AB8"
                       : isSelected
-                      ? "#ff8a65"
-                      : "#a0b4be",
-                    background: "rgba(10,15,20,0.8)",
+                      ? "#007AB8"
+                      : "#1A2B3B",
+                    background: "rgba(255,255,255,0.9)",
                     padding: "1px 4px",
                     borderRadius: 2,
                     maxWidth: nodeSize * 8,
@@ -604,9 +605,9 @@ export default function App() {
                   width: nodeSize,
                   height: nodeSize,
                   borderRadius: "50%",
-                  background: "#3ddc84",
-                  border: "2px solid #6aefaa",
-                  boxShadow: "0 0 10px #3ddc8466",
+                  background: "#24A148",
+                  border: "2px solid #1e8a3d",
+                  boxShadow: "0 0 10px rgba(36,161,72,0.4)",
                   animation: "pulse 1s ease infinite",
                 }}
               />
@@ -628,16 +629,15 @@ export default function App() {
                 onMouseDown={(e) => e.stopPropagation()}
                 placeholder="Room name..."
                 style={{
-                  background: "#0d1319",
-                  border: "1px solid #3ddc84",
+                  background: "#EDF0F4",
+                  border: "1px solid #24A148",
                   borderRadius: 4,
-                  color: "#e0e8ec",
-                  padding: "3px 8px",
-                  fontSize: 9,
-                  fontFamily:
-                    "'IBM Plex Mono', 'JetBrains Mono', monospace",
+                  color: "#1A2B3B",
+                  padding: "4px 8px",
+                  fontSize: 11,
+                  fontFamily: "'DM Sans', system-ui, sans-serif",
                   outline: "none",
-                  width: 120,
+                  width: 140,
                   textAlign: "center",
                 }}
               />
