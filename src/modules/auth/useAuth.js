@@ -1,31 +1,36 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 
+function isInviteOrRecoveryUrl() {
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  const type = params.get("type");
+  return type === "invite" || type === "recovery";
+}
+
 export function useAuth() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
+  // Read the hash immediately — Supabase clears it before onAuthStateChange fires
+  const [needsPasswordSetup, setNeedsPasswordSetup] = useState(isInviteOrRecoveryUrl);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) loadProfile(session.user.id);
+      if (session && !needsPasswordSetup) loadProfile(session.user.id);
+      else if (!needsPasswordSetup) setAuthLoading(false);
       else setAuthLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
-        const hash = window.location.hash;
-        if (hash.includes("type=invite") || hash.includes("type=recovery")) {
-          setNeedsPasswordSetup(true);
-          setAuthLoading(false);
-          return;
-        }
+      if (event === "PASSWORD_RECOVERY") {
+        setNeedsPasswordSetup(true);
+        setAuthLoading(false);
+        return;
       }
-      if (session) loadProfile(session.user.id);
-      else {
+      setSession(session);
+      if (session && !needsPasswordSetup) loadProfile(session.user.id);
+      else if (!session) {
         setProfile(null);
         setAuthLoading(false);
       }
