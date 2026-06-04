@@ -5,13 +5,28 @@ import { useNodeLayer } from "./modules/nodeLayer";
 import { useSearchEngine } from "./modules/searchEngine";
 import { createMap, uploadMapFile, updateMap, deleteMap, fetchMaps, getMapFileUrl, fetchNodeCount } from "./modules/dataLayer";
 import { useAuth } from "./modules/auth/useAuth";
+import { useIdleTimeout } from "./modules/auth/useIdleTimeout";
 import Login from "./components/Login";
+import IdleWarning from "./components/IdleWarning";
+import Legal from "./components/Legal";
 import { styles } from "./styles";
 
 const INSPECTION_ZOOM = 1.2;
 
 export default function App() {
-  const { session, authLoading, isAdmin, signIn, signOut } = useAuth();
+  const { session, profile, authLoading, isAdmin, signIn, signOut } = useAuth();
+  const [showIdleWarning, setShowIdleWarning] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
+
+  const handleIdleWarn   = useCallback(() => setShowIdleWarning(true),  []);
+  const handleIdleLogout = useCallback(() => { setShowIdleWarning(false); signOut(); }, [signOut]);
+  const handleIdleStay   = useCallback(() => setShowIdleWarning(false), []);
+
+  useIdleTimeout({
+    onWarn:   handleIdleWarn,
+    onLogout: handleIdleLogout,
+    enabled:  !!session,
+  });
   const viewport = useViewport();
   const map = useMapLayer();
   const [currentMapId, setCurrentMapId] = useState(null);
@@ -247,64 +262,117 @@ export default function App() {
   const hasMap = !!map.mapSrc;
 
   // ---- DASHBOARD VIEW ----
+  const totalNodes = Object.values(nodeCounts).reduce((a, b) => a + b, 0);
+
   if (currentView === "dashboard") {
     return (
-      <div style={styles.dashShell}>
-        <div style={styles.dashHeader}>
-          <span style={styles.dashTitle}>Site Access Plans</span>
-          <div style={styles.dashHeaderRight}>
-            <button onClick={() => dashboardNewMapInputRef.current?.click()} style={styles.dashCreateBtn}>
-              + NEW MAP
-            </button>
-            <input
-              ref={dashboardNewMapInputRef}
-              type="file"
-              accept="image/*,.pdf,application/pdf"
-              onChange={(e) => { setDashboardNewMap(true); map.handleFilePick(e); }}
-              style={{ display: "none" }}
-            />
-            <button onClick={signOut} style={styles.signOutBtn}>SIGN OUT</button>
+      <>
+        {showIdleWarning && (
+          <IdleWarning onStay={handleIdleStay} onLogout={handleIdleLogout} />
+        )}
+        {showLegal && <Legal onClose={() => setShowLegal(false)} />}
+
+        <div style={styles.dashShell}>
+          {/* Header */}
+          <div style={styles.dashHeader}>
+            <div style={styles.dashHeaderLeft}>
+              <div style={styles.dashLogo}>DR</div>
+              <div style={styles.dashBranding}>
+                <span style={styles.dashTitle}>Site Access Plans</span>
+                <span style={styles.dashSubtitle}>Digital Realty · Facility Access</span>
+              </div>
+            </div>
+            <div style={styles.dashHeaderRight}>
+              <button onClick={() => dashboardNewMapInputRef.current?.click()} style={styles.dashCreateBtn}>
+                + New Map
+              </button>
+              <input
+                ref={dashboardNewMapInputRef}
+                type="file"
+                accept="image/*,.pdf,application/pdf"
+                onChange={(e) => { setDashboardNewMap(true); map.handleFilePick(e); }}
+                style={{ display: "none" }}
+              />
+              <button onClick={signOut} style={styles.signOutBtn}>Sign Out</button>
+            </div>
+          </div>
+
+          {/* Stats bar */}
+          {!dashboardLoading && dashboardMaps.length > 0 && (
+            <div style={styles.dashStats}>
+              <div style={styles.dashStatLast}>
+                <div style={styles.dashStatIcon} />
+                <div>
+                  <div style={styles.dashStatValue}>{dashboardMaps.length}</div>
+                  <div style={styles.dashStatLabel}>Maps</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Content */}
+          {dashboardLoading ? (
+            <div style={styles.dashCentered}>
+              <div style={styles.spinner} />
+              <span style={styles.loadingText}>Loading maps...</span>
+            </div>
+          ) : dashboardMaps.length === 0 ? (
+            <div style={styles.dashCentered}>
+              <div style={styles.dashEmptyIcon} />
+              <span style={styles.dashEmpty}>No maps yet</span>
+              <span style={styles.dashEmptyHint}>Click "+ New Map" to upload your first floor plan.</span>
+            </div>
+          ) : (
+            <div style={styles.dashGrid}>
+              {dashboardMaps.map((m) => (
+                <div key={m.id} style={styles.dashCard} onClick={() => handleCardClick(m)}>
+                  <div style={styles.dashCardAccent} />
+                  <div style={styles.dashCardTop}>
+                    <span style={styles.dashCardName}>{m.name}</span>
+                    <span style={styles.fileTypeBadge}>{m.file_type.toUpperCase()}</span>
+                  </div>
+                  <div style={styles.dashCardMeta}>
+                    <span style={styles.dashCardMetaItem}>{m.width} × {m.height}px</span>
+                    <span style={styles.dashCardMetaDot} />
+                    <span style={styles.dashCardMetaItem}>
+                      {new Date(m.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => handleDeleteMap(e, m.id)}
+                    style={styles.dashDeleteBtn}
+                    title="Delete map"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={styles.dashFooter}>
+            <span style={styles.dashFooterLeft}>
+              © {new Date().getFullYear()} Mahmood Idelbi · Confidential — Internal Use Only
+            </span>
+            <div style={styles.dashFooterRight}>
+              <button style={styles.dashLegalBtn} onClick={() => setShowLegal(true)}>
+                Legal &amp; Privacy
+              </button>
+            </div>
           </div>
         </div>
-
-        {dashboardLoading ? (
-          <div style={styles.dashCentered}>
-            <div style={styles.spinner} />
-            <span style={styles.loadingText}>LOADING MAPS...</span>
-          </div>
-        ) : dashboardMaps.length === 0 ? (
-          <div style={styles.dashCentered}>
-            <span style={styles.dashEmpty}>No maps yet — create one to get started.</span>
-          </div>
-        ) : (
-          <div style={styles.dashGrid}>
-            {dashboardMaps.map((m) => (
-              <div key={m.id} style={styles.dashCard} onClick={() => handleCardClick(m)}>
-                <div style={styles.dashCardTop}>
-                  <span style={styles.dashCardName}>{m.name}</span>
-                  <span style={styles.fileTypeBadge}>{m.file_type.toUpperCase()}</span>
-                </div>
-                <div style={styles.dashCardMeta}>
-                  <span>{m.width} × {m.height}px</span>
-                  <span>{nodeCounts[m.id] ?? 0} nodes</span>
-                  <span>{new Date(m.updated_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-                </div>
-                <button
-                  onClick={(e) => handleDeleteMap(e, m.id)}
-                  style={styles.dashDeleteBtn}
-                  title="Delete map"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      </>
     );
   }
 
   return (
+    <>
+      {showIdleWarning && (
+        <IdleWarning onStay={handleIdleStay} onLogout={handleIdleLogout} />
+      )}
+      {showLegal && <Legal onClose={() => setShowLegal(false)} />}
+
     <div style={styles.shell}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -627,7 +695,7 @@ export default function App() {
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                placeholder="Room name..."
+                placeholder="Access name..."
                 style={{
                   background: "#EDF0F4",
                   border: "1px solid #24A148",
@@ -697,8 +765,8 @@ export default function App() {
           <div ref={panelRef} style={styles.panel}>
             {/* Panel header */}
             <div style={styles.panelHeader}>
-              <span style={styles.panelTitle}>NODES</span>
-              <span style={styles.panelCount}>{nodeLayer.nodes.length}</span>
+              <span style={styles.panelTitle}>ACCESS</span>
+              <span style={styles.panelCount}>{panelNodes.length}</span>
             </div>
 
             {/* Search */}
@@ -715,7 +783,7 @@ export default function App() {
                     searchEngine.clearSearch();
                   }
                 }}
-                placeholder="Search nodes..."
+                placeholder="Search access..."
                 style={styles.searchInput}
               />
               {(searchEngine.query || searchEngine.focusedName) && (
@@ -761,7 +829,7 @@ export default function App() {
 
             {/* Node size control */}
             <div style={styles.sizeControl}>
-              <span style={styles.sizeLabel}>NODE SIZE</span>
+              <span style={styles.sizeLabel}>ACCESS SIZE</span>
               <div style={styles.sizeButtons}>
                 <button onClick={() => setNodeSize((s) => Math.max(4, s - 2))} style={styles.sizeBtn}>−</button>
                 <span style={styles.sizeValue}>{nodeSize}px</span>
@@ -787,7 +855,7 @@ export default function App() {
                     color: nodeLayer.placementMode ? "#e05555" : "#c8d6e0",
                   }}
                 >
-                  {nodeLayer.placementMode ? "CANCEL PLACEMENT" : "+ ADD NODE"}
+                  {nodeLayer.placementMode ? "CANCEL" : "+ ADD ACCESS"}
                 </button>
                 {nodeLayer.placementMode && (
                   <div style={styles.placementHint}>
@@ -805,7 +873,7 @@ export default function App() {
                 <div style={styles.emptyList}>
                   {searchEngine.query.trim()
                     ? "No matches"
-                    : "No nodes yet — add one"}
+                    : "No access points yet — add one"}
                 </div>
               )}
               {panelNodes.map((node) => {
@@ -854,7 +922,7 @@ export default function App() {
                           searchEngine.focusNode(node.name, node.id);
                         }}
                         style={styles.nodeName}
-                        title={isDuplicated ? `${node.count} locations — use ◀▶ to cycle` : "Click to zoom to node"}
+                        title={isDuplicated ? `${node.count} locations — use ◀▶ to cycle` : "Click to zoom to access point"}
                       >
                         {node.name}
                       </span>
@@ -936,6 +1004,7 @@ export default function App() {
         </span>
       </div>
     </div>
+    </>
   );
 }
 
