@@ -7,6 +7,7 @@ import { createMap, uploadMapFile, updateMap, deleteMap, fetchMaps, getMapFileUr
 import { useAuth } from "./modules/auth/useAuth";
 import { useIdleTimeout } from "./modules/auth/useIdleTimeout";
 import Login from "./components/Login";
+import SetPassword from "./components/SetPassword";
 import IdleWarning from "./components/IdleWarning";
 import Legal from "./components/Legal";
 import { styles } from "./styles";
@@ -14,7 +15,7 @@ import { styles } from "./styles";
 const INSPECTION_ZOOM = 1.2;
 
 export default function App() {
-  const { session, profile, authLoading, isAdmin, signIn, signOut } = useAuth();
+  const { session, profile, authLoading, needsPasswordSetup, isAdmin, signIn, signOut, setPassword } = useAuth();
   const [showIdleWarning, setShowIdleWarning] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
 
@@ -243,6 +244,7 @@ export default function App() {
 
   // Auth guards — after all hooks
   if (authLoading) return <div style={styles.authShell}><span style={styles.authLoadingText}>LOADING...</span></div>;
+  if (needsPasswordSetup) return <SetPassword onSetPassword={setPassword} />;
   if (!session) return <Login onSignIn={signIn} />;
 
   const panelNodes = (() => {

@@ -5,6 +5,7 @@ export function useAuth() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -13,8 +14,16 @@ export function useAuth() {
       else setAuthLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        const hash = window.location.hash;
+        if (hash.includes("type=invite") || hash.includes("type=recovery")) {
+          setNeedsPasswordSetup(true);
+          setAuthLoading(false);
+          return;
+        }
+      }
       if (session) loadProfile(session.user.id);
       else {
         setProfile(null);
@@ -50,12 +59,21 @@ export function useAuth() {
     setProfile(null);
   }
 
+  async function setPassword(newPassword) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+    setNeedsPasswordSetup(false);
+    window.location.hash = "";
+  }
+
   return {
     session,
     profile,
     authLoading,
+    needsPasswordSetup,
     isAdmin: profile?.role === "admin",
     signIn,
     signOut,
+    setPassword,
   };
 }
